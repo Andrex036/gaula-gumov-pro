@@ -1,0 +1,114 @@
+Actúa como arquitecto de software senior y desarrollador mobile. Crea una APP MÓVIL (Android/iOS) llamada “Control Parque Automotor – GAULA” pensada para operación diaria en campo. Debe ser un proyecto ejecutable en Replit (monorepo), usando un stack simple y robusto:
+
+STACK RECOMENDADO (prioridad):
+- Mobile: React Native + Expo (TypeScript)
+- Backend API: Node.js + Express (TypeScript)
+- DB: PostgreSQL (Neon/Supabase) o SQLite local si no hay Postgres (pero preferir Postgres)
+- Storage fotos: Supabase Storage (o alternativa S3 compatible)
+- Auth: JWT + refresh + RBAC
+
+OBJETIVO:
+Controlar el parque automotor del GAULA con BD de Conductores y Vehículos, registro diario de salidas y regresos, evidencias fotográficas, filtros, exportación de reportes y auditoría.
+
+MÓDULOS OBLIGATORIOS:
+1) Autenticación y roles (RBAC):
+- Roles: Administrador, Supervisor/Jefe, Operador, Consulta
+- Permisos por pantalla/acción (mínimo privilegio)
+- Bloqueo por intentos fallidos y expiración de sesión
+
+2) Maestros (BD):
+A. Conductores:
+- id, nombres, apellidos, grado_id, placa_policial (única), unidad, estado, observaciones
+B. Grados (catálogo):
+- id, nombre_grado, orden_jerarquico
+C. Vehículos:
+- id, placa (única), siglas, tipo_automotor_id, estado (Disponible/En misión/Mantenimiento/Fuera de servicio),
+  kilometraje_actual, vencimiento_soat, vencimiento_tecnomecanica, observaciones
+D. Tipos automotor (catálogo fijo):
+- Motocicleta, Camión, Camioneta, Automóvil, Bus, Microbús
+E. Auditoría (log)
+F. Adjuntos (fotos)
+
+3) Registro diario (Bitácora de movilidad):
+Debe permitir:
+- Crear SALIDA (abre registro)
+- Completar REGRESO (cierra registro)
+Campos del registro (obligatorios):
+- fecha (auto), hora_salida, vehiculo_id, conductor_id, destino, mision,
+  kilometraje_salida, fecha_regreso, hora_regreso, kilometraje_regreso,
+  observaciones (obligatorio con opción “Sin novedades”), estado_registro (Abierto/Cerrado/Anulado),
+  foto (mínimo 1; ideal salida y regreso)
+
+REGLA CRÍTICA: CAMPOS OBLIGATORIOS POR SELECCIÓN DESDE BD (NO DIGITACIÓN LIBRE)
+En el formulario de registro:
+- Conductor: se selecciona por búsqueda (nombre/apellido o placa policial) y se AUTOCOMPLETA:
+  nombres, apellidos, grado, placa_policial
+- Vehículo: se selecciona por búsqueda de placa y se AUTOCOMPLETA:
+  placa, siglas, tipo_automotor, kilometraje_actual, estado
+Estos campos NO deben ser editables manualmente en el registro.
+
+REGLAS DE NEGOCIO:
+- No permitir dos registros ABIERTOS para la misma placa.
+- No permitir salida si conductor inactivo o vehículo en mantenimiento/fuera de servicio.
+- Al registrar salida: vehículo pasa a “En misión”.
+- Al cerrar regreso: vehículo vuelve a “Disponible” (o “Mantenimiento” si se marca novedad).
+- Validar kilometraje_regreso >= kilometraje_salida.
+- Registros cerrados: no editables; solo “Anular” con motivo + auditoría.
+- Alertas: regreso pendiente tras X horas (configurable); documentos por vencer/vencidos; kilometraje inconsistente.
+
+FUNCIONALIDADES EJECUTIVAS (MÓVIL):
+- Dashboard: disponibles/en misión/mantenimiento + “pendientes de regreso” + alertas
+- Registro rápido: botones “Nueva salida” y “Completar regreso”
+- Cámara: tomar foto, comprimir, subir, asociar al registro
+- Modo conectividad limitada: cola offline (guardar borrador local y sincronizar al recuperar internet)
+- Búsqueda y filtros: por fechas, placa, siglas, tipo automotor, conductor, destino, estado, pendientes
+- Exportación de reportes: generar CSV/PDF desde backend y permitir descarga/compartir (share sheet)
+
+API BACKEND (mínimo):
+- Auth: POST /auth/login, POST /auth/refresh, POST /auth/logout
+- Conductores: CRUD + búsqueda (GET /conductores?search=)
+- Vehículos: CRUD + búsqueda (GET /vehiculos?search=)
+- Registros: 
+  - POST /registros/salida
+  - PATCH /registros/:id/regreso
+  - GET /registros?filters...
+  - GET /registros/pendientes
+  - POST /registros/:id/anular
+- Fotos: POST /uploads (o integración directa con storage)
+- Reportes: GET /reportes?... (devuelve PDF/CSV)
+- Auditoría: GET /auditoria?filters...
+
+SEGURIDAD Y TRAZABILIDAD:
+- Auditoría de: crear/editar/anular/aprobar, login fallido, cambios en maestros
+- Guardar ip, user-agent, usuario, timestamp
+- Validación fuerte en backend (no confiar en frontend)
+
+ENTREGABLES EN LA RESPUESTA (OBLIGATORIO):
+1) Estructura del monorepo Replit (carpetas):
+- /apps/mobile (Expo RN)
+- /apps/api (Express)
+- /packages/shared (types/validators)
+2) Scripts listos para correr en Replit (dev/start)
+3) Esquema SQL PostgreSQL con constraints e índices clave
+4) Modelos TypeScript y validaciones
+5) Pantallas principales (RN) con navegación:
+- Login
+- Dashboard
+- Conductores
+- Vehículos
+- Nueva salida
+- Completar regreso
+- Registros (lista + filtros + detalle)
+- Reportes
+6) Implementación base de RBAC
+7) Ejemplos de payloads JSON
+8) Instrucciones paso a paso para configurar variables de entorno:
+- DATABASE_URL, JWT_SECRET, STORAGE_*, etc.
+
+REQUISITOS DE CALIDAD:
+- Código limpio, comentado, TypeScript estricto
+- Manejo de errores y estados de carga
+- UI simple, institucional, orientada a operación rápida
+- Todo en español (es-CO). No usar datos reales, solo ejemplos.
+
+Genera el proyecto completo con el código inicial funcional (mínimo viable), listo para ejecutar en Replit.
