@@ -13,6 +13,7 @@ import Vehiculos from "./pages/Vehiculos";
 import NuevaSalida from "./pages/NuevaSalida";
 import CompletarRegreso from "./pages/CompletarRegreso";
 import Registros from "./pages/Registros";
+import ImportarDatos from "./pages/ImportarDatos";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
         <Route path="/salida" component={NuevaSalida}/>
         <Route path="/regreso" component={CompletarRegreso}/>
         <Route path="/registros" component={Registros}/>
+        <Route path="/importar" component={ImportarDatos}/>
         <Route component={NotFound} />
       </Switch>
     </MobileLayout>

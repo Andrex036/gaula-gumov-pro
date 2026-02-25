@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Users, Car, FileText, Menu, LogOut } from "lucide-react";
+import { Home, Users, Car, FileText, Menu, LogOut, Upload } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { USUARIO_ACTUAL } from "@/lib/mock-data";
@@ -14,6 +14,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     { href: "/conductores", label: "Conductores", icon: Users },
     { href: "/vehiculos", label: "Vehículos", icon: Car },
     { href: "/registros", label: "Registros", icon: FileText },
+    { href: "/importar", label: "Importar", icon: Upload },
   ];
 
   return (
