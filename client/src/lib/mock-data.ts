@@ -20,9 +20,39 @@ export const TIPOS_AUTOMOTOR = [
 ];
 
 export const VEHICULOS = [
-  { id: "V001", placa: "GNA-123", siglas: "MI-45", tipo: "Motocicleta", estado: "Disponible", kilometraje_actual: 15420, vencimiento_soat: "2024-12-01", observaciones: "" },
-  { id: "V002", placa: "POL-987", siglas: "CA-12", tipo: "Camioneta", estado: "En misión", kilometraje_actual: 85300, vencimiento_soat: "2024-08-15", observaciones: "" },
-  { id: "V003", placa: "BOG-456", siglas: "AU-08", tipo: "Automóvil", estado: "Mantenimiento", kilometraje_actual: 120500, vencimiento_soat: "2024-05-10", observaciones: "Falla en frenos" },
+  { 
+    id: "V001", 
+    placa: "GNA-123", 
+    siglas: "MI-45", 
+    tipo: "Motocicleta", 
+    estado: "Disponible", 
+    kilometraje_actual: 15420, 
+    vencimiento_soat: "2024-03-01", // Vencido para pruebas
+    vencimiento_tecnomecanica: "2024-12-15",
+    observaciones: "" 
+  },
+  { 
+    id: "V002", 
+    placa: "POL-987", 
+    siglas: "CA-12", 
+    tipo: "Camioneta", 
+    estado: "En misión", 
+    kilometraje_actual: 85300, 
+    vencimiento_soat: "2025-08-15", 
+    vencimiento_tecnomecanica: "2024-04-20", // Vencido para pruebas
+    observaciones: "" 
+  },
+  { 
+    id: "V003", 
+    placa: "BOG-456", 
+    siglas: "AU-08", 
+    tipo: "Automóvil", 
+    estado: "Mantenimiento", 
+    kilometraje_actual: 120500, 
+    vencimiento_soat: "2024-05-10", 
+    vencimiento_tecnomecanica: "2024-06-10",
+    observaciones: "Falla en frenos" 
+  },
 ];
 
 export const REGISTROS_DIARIOS = [

@@ -6,13 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Camera, Check, Plus, Trash2 } from "lucide-react";
+import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { CONDUCTORES, VEHICULOS } from "@/lib/mock-data";
+import { isBefore, parseISO } from "date-fns";
 
 export default function NuevaSalida() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const today = new Date();
   
   const [vehiculoId, setVehiculoId] = useState("");
   const [conductorId, setConductorId] = useState("");
@@ -29,6 +32,19 @@ export default function NuevaSalida() {
   const vehiculoSel = VEHICULOS.find(v => v.id === vehiculoId);
   const conductorSel = CONDUCTORES.find(c => c.id === conductorId);
 
+  const isVencido = (dateStr?: string) => {
+    if (!dateStr) return false;
+    try {
+      return isBefore(parseISO(dateStr), today);
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const soatVencido = isVencido(vehiculoSel?.vencimiento_soat);
+  const tmVencida = isVencido(vehiculoSel?.vencimiento_tecnomecanica);
+  const tieneAlertas = soatVencido || tmVencida;
+
   const addPasajero = (id: string) => {
     if (id && !pasajeros.includes(id) && id !== conductorId) {
       setPasajeros([...pasajeros, id]);
@@ -44,6 +60,14 @@ export default function NuevaSalida() {
     if (!vehiculoSel || !conductorSel) {
       toast({ title: "Error", description: "Seleccione conductor y vehículo", variant: "destructive" });
       return;
+    }
+
+    if (tieneAlertas) {
+      toast({
+        title: "Atención: Documentación Vencida",
+        description: "Se registrará la salida a pesar de tener documentos vencidos. Reporte esta novedad.",
+        variant: "destructive",
+      });
     }
     
     toast({
@@ -89,6 +113,54 @@ export default function NuevaSalida() {
           </CardContent>
         </Card>
 
+        {/* VEHICLE SELECTION */}
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader className="bg-slate-50 border-b pb-3 pt-4">
+            <CardTitle className="text-sm font-bold text-slate-700 uppercase tracking-wider">Vehículo</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Seleccionar Vehículo</Label>
+              <Select value={vehiculoId} onValueChange={setVehiculoId}>
+                <SelectTrigger className="h-12 bg-white">
+                  <SelectValue placeholder="Seleccione vehículo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {VEHICULOS.filter(v => v.estado === 'Disponible').map(v => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.siglas} - {v.placa}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {vehiculoSel && (
+              <div className="space-y-3 animate-in fade-in slide-in-from-top-1">
+                <div className="bg-emerald-50 p-3 rounded-md border border-emerald-100">
+                  <div className="flex justify-between items-center">
+                    <p className="font-bold text-emerald-900 text-lg">{vehiculoSel.siglas}</p>
+                    <span className="font-mono text-emerald-800 bg-emerald-100 px-2 py-1 rounded text-xs">KM: {vehiculoSel.kilometraje_actual}</span>
+                  </div>
+                  <p className="text-sm text-emerald-700 mt-1">Placa: {vehiculoSel.placa} | {vehiculoSel.tipo}</p>
+                </div>
+
+                {/* ALERTAS DE DOCUMENTACIÓN */}
+                {tieneAlertas && (
+                  <Alert variant="destructive" className="bg-rose-50 border-rose-200 text-rose-900">
+                    <AlertTriangle className="h-4 w-4 text-rose-600" />
+                    <AlertTitle className="font-bold">Alerta de Documentación</AlertTitle>
+                    <AlertDescription className="text-xs space-y-1 mt-1">
+                      {soatVencido && <p className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> SOAT VENCIDO: {vehiculoSel.vencimiento_soat}</p>}
+                      {tmVencida && <p className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> TECNOMECÁNICA VENCIDA: {vehiculoSel.vencimiento_tecnomecanica}</p>}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* PASAJEROS */}
         <Card className="shadow-sm border-slate-200">
           <CardHeader className="bg-slate-50 border-b pb-3 pt-4 flex flex-row items-center justify-between">
@@ -124,40 +196,6 @@ export default function NuevaSalida() {
                 ));
               })}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* VEHICLE SELECTION */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="bg-slate-50 border-b pb-3 pt-4">
-            <CardTitle className="text-sm font-bold text-slate-700 uppercase tracking-wider">Vehículo</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4 space-y-4">
-            <div className="space-y-2">
-              <Label>Seleccionar Vehículo</Label>
-              <Select value={vehiculoId} onValueChange={setVehiculoId}>
-                <SelectTrigger className="h-12 bg-white">
-                  <SelectValue placeholder="Seleccione vehículo..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {VEHICULOS.filter(v => v.estado === 'Disponible').map(v => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {v.siglas} - {v.placa}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {vehiculoSel && (
-              <div className="bg-emerald-50 p-3 rounded-md border border-emerald-100 animate-in fade-in slide-in-from-top-1">
-                <div className="flex justify-between items-center">
-                  <p className="font-bold text-emerald-900 text-lg">{vehiculoSel.siglas}</p>
-                  <span className="font-mono text-emerald-800 bg-emerald-100 px-2 py-1 rounded text-xs">KM: {vehiculoSel.kilometraje_actual}</span>
-                </div>
-                <p className="text-sm text-emerald-700 mt-1">Placa: {vehiculoSel.placa} | {vehiculoSel.tipo}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
 

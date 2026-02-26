@@ -55,7 +55,7 @@ export default function ImportarDatos() {
   const downloadTemplate = (type: string) => {
     const headers = type === "conductores" 
       ? [["nombres", "apellidos", "grado", "placa_policial", "unidad"]]
-      : [["placa", "siglas", "tipo", "kilometraje_actual", "vencimiento_soat"]];
+      : [["placa", "siglas", "tipo", "kilometraje_actual", "vencimiento_soat", "vencimiento_tecnomecanica"]];
     
     const ws = XLSX.utils.aoa_to_sheet(headers);
     const wb = XLSX.utils.book_new();
