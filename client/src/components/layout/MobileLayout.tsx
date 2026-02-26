@@ -3,6 +3,7 @@ import { Home, Users, Car, FileText, Menu, LogOut, Upload } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { USUARIO_ACTUAL } from "@/lib/mock-data";
+import escudoGaula from "@assets/Escudo_GAULA_Vectorizado_1772078238682.png";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -29,19 +30,22 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="bg-white p-0 w-72 flex flex-col">
-              <div className="p-6 bg-primary text-primary-foreground">
+              <div className="p-6 bg-primary text-primary-foreground flex flex-col items-center text-center">
+                <img src={escudoGaula} alt="Escudo GAULA" className="w-20 h-20 mb-3 drop-shadow-lg" />
                 <h2 className="text-xl font-bold">GAULA Móvil</h2>
                 <p className="text-sm opacity-80 mt-1">{USUARIO_ACTUAL.nombre}</p>
-                <p className="text-xs opacity-60">{USUARIO_ACTUAL.unidad} - {USUARIO_ACTUAL.rol}</p>
+                <p className="text-[10px] opacity-60 uppercase tracking-wider font-bold mt-1">
+                  {USUARIO_ACTUAL.unidad} • {USUARIO_ACTUAL.rol}
+                </p>
               </div>
               <div className="flex-1 py-4 flex flex-col gap-1 px-3">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href}>
                     <Button 
                       variant={location === item.href ? "secondary" : "ghost"} 
-                      className="w-full justify-start gap-3 h-12"
+                      className={`w-full justify-start gap-3 h-12 ${location === item.href ? 'text-primary font-bold' : ''}`}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className={`h-5 w-5 ${location === item.href ? 'text-primary' : ''}`} />
                       {item.label}
                     </Button>
                   </Link>
@@ -49,7 +53,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
               </div>
               <div className="p-4 border-t">
                 <Link href="/">
-                  <Button variant="outline" className="w-full text-destructive gap-2 h-12">
+                  <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/10 gap-2 h-12">
                     <LogOut className="h-5 w-5" />
                     Cerrar Sesión
                   </Button>
@@ -57,7 +61,10 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
               </div>
             </SheetContent>
           </Sheet>
-          <h1 className="font-semibold text-lg tracking-tight">Parque Automotor</h1>
+          <div className="flex items-center gap-2">
+            <img src={escudoGaula} alt="" className="w-8 h-8" />
+            <h1 className="font-bold text-lg tracking-tight uppercase">GAULA</h1>
+          </div>
         </div>
       </header>
 
@@ -74,9 +81,9 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <a className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary/70'}`}>
-                <item.icon className={`h-6 w-6 ${isActive ? 'fill-primary/10' : ''}`} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+              <a className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${isActive ? 'text-primary scale-110' : 'text-muted-foreground hover:text-primary/70'}`}>
+                <item.icon className={`h-6 w-6 ${isActive ? 'fill-primary/10 stroke-[2.5px]' : ''}`} />
+                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
               </a>
             </Link>
           );

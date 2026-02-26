@@ -30,27 +30,27 @@
 }
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 130 20% 98%;
+  --foreground: 130 50% 10%;
   
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 130 50% 10%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 130 50% 10%;
   
-  /* Institutional Navy Blue */
-  --primary: 222 47% 20%;
-  --primary-foreground: 210 40% 98%;
+  /* GAULA Dark Green #006612 */
+  --primary: 131 100% 20%;
+  --primary-foreground: 130 20% 98%;
   
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary: 130 30% 95%;
+  --secondary-foreground: 131 100% 20%;
   
-  --muted: 210 40% 90%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 130 20% 92%;
+  --muted-foreground: 130 15% 40%;
   
-  --accent: 210 40% 90%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: 130 40% 90%;
+  --accent-foreground: 131 100% 15%;
   
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
@@ -61,9 +61,9 @@
   --warning: 38 92% 50%;
   --warning-foreground: 210 40% 98%;
   
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222 47% 20%;
+  --border: 130 20% 90%;
+  --input: 130 20% 90%;
+  --ring: 131 100% 20%;
   
   --radius: 0.75rem;
   --font-sans: 'Inter', sans-serif;
@@ -75,11 +75,9 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    /* Prevent pull-to-refresh on mobile */
     overscroll-behavior-y: none;
   }
   
-  /* Hide scrollbar for clean mobile feel */
   ::-webkit-scrollbar {
     width: 0px;
     background: transparent;
