@@ -27,7 +27,7 @@ export const VEHICULOS = [
     tipo: "Motocicleta", 
     estado: "Disponible", 
     kilometraje_actual: 15420, 
-    vencimiento_soat: "2024-03-01", // Vencido para pruebas
+    vencimiento_soat: "2024-03-01", 
     vencimiento_tecnomecanica: "2024-12-15",
     observaciones: "" 
   },
@@ -39,7 +39,7 @@ export const VEHICULOS = [
     estado: "En misión", 
     kilometraje_actual: 85300, 
     vencimiento_soat: "2025-08-15", 
-    vencimiento_tecnomecanica: "2024-04-20", // Vencido para pruebas
+    vencimiento_tecnomecanica: "2024-04-20", 
     observaciones: "" 
   },
   { 
@@ -55,6 +55,11 @@ export const VEHICULOS = [
   },
 ];
 
+// Mock Image URLs for visual testing
+const MOCK_IMG_1 = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80";
+const MOCK_IMG_2 = "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80";
+const MOCK_IMG_3 = "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80";
+
 export const REGISTROS_DIARIOS = [
   {
     id: "R001",
@@ -68,7 +73,9 @@ export const REGISTROS_DIARIOS = [
     hora_regreso: null,
     kilometraje_regreso: null,
     estado_registro: "Abierto",
-    observaciones: ""
+    observaciones: "",
+    fotos_salida: [MOCK_IMG_1, MOCK_IMG_2],
+    fotos_regreso: []
   },
   {
     id: "R002",
@@ -82,7 +89,9 @@ export const REGISTROS_DIARIOS = [
     hora_regreso: "14:00",
     kilometraje_regreso: 15420,
     estado_registro: "Cerrado",
-    observaciones: "Sin novedades"
+    observaciones: "Sin novedades",
+    fotos_salida: [MOCK_IMG_3],
+    fotos_regreso: [MOCK_IMG_1, MOCK_IMG_2]
   }
 ];
 

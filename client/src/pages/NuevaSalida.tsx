@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock } from "lucide-react";
+import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { CONDUCTORES, VEHICULOS } from "@/lib/mock-data";
@@ -20,6 +20,7 @@ export default function NuevaSalida() {
   const [vehiculoId, setVehiculoId] = useState("");
   const [conductorId, setConductorId] = useState("");
   const [pasajeros, setPasajeros] = useState<string[]>([]);
+  const [fotos, setFotos] = useState<string[]>([]);
   
   const checklistItems = [
     { id: "aceite", label: "Nivel de Aceite" },
@@ -55,24 +56,34 @@ export default function NuevaSalida() {
     setPasajeros(pasajeros.filter(p => p !== id));
   };
 
+  const simulateTakePhoto = () => {
+    const mockImages = [
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80"
+    ];
+    const newFoto = mockImages[Math.floor(Math.random() * mockImages.length)];
+    setFotos([...fotos, newFoto]);
+  };
+
+  const removeFoto = (index: number) => {
+    setFotos(fotos.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vehiculoSel || !conductorSel) {
       toast({ title: "Error", description: "Seleccione conductor y vehículo", variant: "destructive" });
       return;
     }
-
-    if (tieneAlertas) {
-      toast({
-        title: "Atención: Documentación Vencida",
-        description: "Se registrará la salida a pesar de tener documentos vencidos. Reporte esta novedad.",
-        variant: "destructive",
-      });
+    if (fotos.length === 0) {
+      toast({ title: "Error", description: "Debe incluir al menos una foto de evidencia", variant: "destructive" });
+      return;
     }
-    
+
     toast({
       title: "Salida registrada",
-      description: `Vehículo ${vehiculoSel.siglas} en misión con ${pasajeros.length} pasajeros.`,
+      description: `Vehículo ${vehiculoSel.siglas} en misión.`,
     });
     setLocation("/dashboard");
   };
@@ -145,7 +156,6 @@ export default function NuevaSalida() {
                   <p className="text-sm text-emerald-700 mt-1">Placa: {vehiculoSel.placa} | {vehiculoSel.tipo}</p>
                 </div>
 
-                {/* ALERTAS DE DOCUMENTACIÓN */}
                 {tieneAlertas && (
                   <Alert variant="destructive" className="bg-rose-50 border-rose-200 text-rose-900">
                     <AlertTriangle className="h-4 w-4 text-rose-600" />
@@ -158,6 +168,34 @@ export default function NuevaSalida() {
                 )}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* EVIDENCIA FOTOGRAFICA */}
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader className="bg-slate-50 border-b pb-3 pt-4 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-bold text-slate-700 uppercase tracking-wider">Evidencia Fotográfica</CardTitle>
+            <Badge variant="outline">{fotos.length}</Badge>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            <Button type="button" variant="outline" onClick={simulateTakePhoto} className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
+              <Camera className="h-5 w-5" /> Tomar Foto (Salida)
+            </Button>
+            
+            <div className="grid grid-cols-3 gap-2">
+              {fotos.map((foto, index) => (
+                <div key={index} className="relative aspect-square rounded-md overflow-hidden border border-slate-200 animate-in zoom-in-95">
+                  <img src={foto} alt={`Salida ${index + 1}`} className="w-full h-full object-cover" />
+                  <button 
+                    type="button" 
+                    onClick={() => removeFoto(index)}
+                    className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -232,9 +270,6 @@ export default function NuevaSalida() {
               <Label htmlFor="mision">Actividad</Label>
               <Input id="mision" placeholder="Propósito de la salida" required className="h-12 bg-white" />
             </div>
-            <Button type="button" variant="outline" className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
-              <Camera className="h-5 w-5" /> Evidencia Odómetro
-            </Button>
           </CardContent>
         </Card>
 

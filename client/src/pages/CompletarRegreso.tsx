@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, CheckCircle2 } from "lucide-react";
+import { Camera, CheckCircle2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { REGISTROS_DIARIOS } from "@/lib/mock-data";
 
@@ -14,9 +14,8 @@ export default function CompletarRegreso() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   
-  // Try to parse ID from URL search string if we had standard React Router, 
-  // but with Wouter we'll just use state for this mockup or pick the first open
   const [registroId, setRegistroId] = useState("");
+  const [fotos, setFotos] = useState<string[]>([]);
   
   const pendientes = REGISTROS_DIARIOS.filter(r => r.estado_registro === "Abierto");
   const registroSel = pendientes.find(r => r.id === registroId) || pendientes[0];
@@ -27,9 +26,27 @@ export default function CompletarRegreso() {
     }
   }, [registroSel, registroId]);
 
+  const simulateTakePhoto = () => {
+    const mockImages = [
+      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80"
+    ];
+    const newFoto = mockImages[Math.floor(Math.random() * mockImages.length)];
+    setFotos([...fotos, newFoto]);
+  };
+
+  const removeFoto = (index: number) => {
+    setFotos(fotos.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!registroSel) return;
+    if (fotos.length === 0) {
+      toast({ title: "Error", description: "Debe incluir al menos una foto de evidencia", variant: "destructive" });
+      return;
+    }
     
     toast({
       title: "Regreso completado",
@@ -117,17 +134,32 @@ export default function CompletarRegreso() {
               <Label htmlFor="novedades">Novedades / Observaciones</Label>
               <Textarea 
                 id="novedades" 
-                placeholder="Indique si hubo alguna novedad (choque, falla mecánica, etc.) o escriba 'Sin novedades'" 
+                placeholder="Indique si hubo alguna novedad o escriba 'Sin novedades'" 
                 required
                 className="min-h-24 bg-white"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Evidencia Fotográfica</Label>
-              <Button type="button" variant="outline" className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
-                <Camera className="h-5 w-5" /> Tomar Foto Odómetro
+            <div className="space-y-4 border-t pt-4">
+              <Label>Evidencia Fotográfica (Regreso)</Label>
+              <Button type="button" variant="outline" onClick={simulateTakePhoto} className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
+                <Camera className="h-5 w-5" /> Tomar Foto (Regreso)
               </Button>
+              
+              <div className="grid grid-cols-3 gap-2">
+                {fotos.map((foto, index) => (
+                  <div key={index} className="relative aspect-square rounded-md overflow-hidden border border-slate-200 animate-in zoom-in-95">
+                    <img src={foto} alt={`Regreso ${index + 1}`} className="w-full h-full object-cover" />
+                    <button 
+                      type="button" 
+                      onClick={() => removeFoto(index)}
+                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
