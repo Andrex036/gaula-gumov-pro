@@ -84,14 +84,29 @@ export default function NuevaSalida() {
     setPasajeros(pasajeros.filter(p => p !== id));
   };
 
-  const simulateTakePhoto = () => {
-    const mockImages = [
-      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80",
-      "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80",
-      "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80"
-    ];
-    const newFoto = mockImages[Math.floor(Math.random() * mockImages.length)];
-    setFotos([...fotos, newFoto]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tamaño (máximo 5MB por foto para no sobrecargar la DB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Archivo muy pesado",
+        description: "La imagen no debe superar los 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setFotos((prev) => [...prev, base64String]);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input for next capture
+    e.target.value = "";
   };
 
   const removeFoto = (index: number) => {
@@ -246,9 +261,24 @@ export default function NuevaSalida() {
             <Badge variant="outline">{fotos.length}</Badge>
           </CardHeader>
           <CardContent className="pt-4 space-y-4">
-            <Button type="button" variant="outline" onClick={simulateTakePhoto} className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
-              <Camera className="h-5 w-5" /> Tomar Foto (Salida)
-            </Button>
+            <div className="space-y-4">
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                id="foto-salida"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('foto-salida')?.click()}
+                className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50"
+              >
+                <Camera className="h-5 w-5" /> Tomar Foto o Subir Evidencia
+              </Button>
+            </div>
 
             <div className="grid grid-cols-3 gap-2">
               {fotos.map((foto, index) => (

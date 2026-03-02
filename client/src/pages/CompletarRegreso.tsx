@@ -53,14 +53,26 @@ export default function CompletarRegreso() {
     }
   }, [registroSel, registroId]);
 
-  const simulateTakePhoto = () => {
-    const mockImages = [
-      "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80",
-      "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80",
-      "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80"
-    ];
-    const newFoto = mockImages[Math.floor(Math.random() * mockImages.length)];
-    setFotos([...fotos, newFoto]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Archivo muy pesado",
+        description: "La imagen no debe superar los 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setFotos((prev) => [...prev, base64String]);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   const removeFoto = (index: number) => {
@@ -182,8 +194,21 @@ export default function CompletarRegreso() {
 
             <div className="space-y-4 border-t pt-4">
               <Label>Evidencia Fotográfica (Regreso)</Label>
-              <Button type="button" variant="outline" onClick={simulateTakePhoto} className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
-                <Camera className="h-5 w-5" /> Tomar Foto (Regreso)
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                id="foto-regreso"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('foto-regreso')?.click()}
+                className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50"
+              >
+                <Camera className="h-5 w-5" /> Tomar Foto o Subir Evidencia (Regreso)
               </Button>
 
               <div className="grid grid-cols-3 gap-2">
