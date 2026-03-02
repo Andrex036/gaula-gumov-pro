@@ -4,9 +4,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import { AuthProvider } from "./lib/authContext";
 
 import MobileLayout from "./components/layout/MobileLayout";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import RecoverPassword from "./pages/RecoverPassword";
 import Dashboard from "./pages/Dashboard";
 import Conductores from "./pages/Conductores";
 import Vehiculos from "./pages/Vehiculos";
@@ -19,14 +22,16 @@ function Router() {
   return (
     <MobileLayout>
       <Switch>
-        <Route path="/" component={Login}/>
-        <Route path="/dashboard" component={Dashboard}/>
-        <Route path="/conductores" component={Conductores}/>
-        <Route path="/vehiculos" component={Vehiculos}/>
-        <Route path="/salida" component={NuevaSalida}/>
-        <Route path="/regreso" component={CompletarRegreso}/>
-        <Route path="/registros" component={Registros}/>
-        <Route path="/importar" component={ImportarDatos}/>
+        <Route path="/" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/recover-password" component={RecoverPassword} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/conductores" component={Conductores} />
+        <Route path="/vehiculos" component={Vehiculos} />
+        <Route path="/salida" component={NuevaSalida} />
+        <Route path="/regreso" component={CompletarRegreso} />
+        <Route path="/registros" component={Registros} />
+        <Route path="/importar" component={ImportarDatos} />
         <Route component={NotFound} />
       </Switch>
     </MobileLayout>
@@ -36,10 +41,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

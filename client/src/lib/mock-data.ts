@@ -20,45 +20,45 @@ export const TIPOS_AUTOMOTOR = [
 ];
 
 export const VEHICULOS = [
-  { 
-    id: "V001", 
-    placa: "GNA-123", 
-    siglas: "MI-45", 
-    tipo: "Motocicleta", 
-    estado: "Disponible", 
-    kilometraje_actual: 15420, 
-    vencimiento_soat: "2024-03-01", 
+  {
+    id: "V001",
+    placa: "GNA-123",
+    siglas: "MI-45",
+    tipo: "Motocicleta",
+    estado: "Disponible",
+    kilometraje_actual: 15420,
+    vencimiento_soat: "2024-03-01",
     vencimiento_tecnomecanica: "2024-12-15",
-    observaciones: "" 
+    observaciones: ""
   },
-  { 
-    id: "V002", 
-    placa: "POL-987", 
-    siglas: "CA-12", 
-    tipo: "Camioneta", 
-    estado: "En misión", 
-    kilometraje_actual: 85300, 
-    vencimiento_soat: "2025-08-15", 
-    vencimiento_tecnomecanica: "2024-04-20", 
-    observaciones: "" 
+  {
+    id: "V002",
+    placa: "POL-987",
+    siglas: "CA-12",
+    tipo: "Camioneta",
+    estado: "En misión",
+    kilometraje_actual: 85300,
+    vencimiento_soat: "2025-08-15",
+    vencimiento_tecnomecanica: "2024-04-20",
+    observaciones: ""
   },
-  { 
-    id: "V003", 
-    placa: "BOG-456", 
-    siglas: "AU-08", 
-    tipo: "Automóvil", 
-    estado: "Mantenimiento", 
-    kilometraje_actual: 120500, 
-    vencimiento_soat: "2024-05-10", 
+  {
+    id: "V003",
+    placa: "BOG-456",
+    siglas: "AU-08",
+    tipo: "Automóvil",
+    estado: "Mantenimiento",
+    kilometraje_actual: 120500,
+    vencimiento_soat: "2024-05-10",
     vencimiento_tecnomecanica: "2024-06-10",
-    observaciones: "Falla en frenos" 
+    observaciones: "Falla en frenos"
   },
 ];
 
-// Mock Image URLs for visual testing
-const MOCK_IMG_1 = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=300&q=80";
-const MOCK_IMG_2 = "https://images.unsplash.com/photo-1594731802111-070115ee5e81?auto=format&fit=crop&w=300&q=80";
-const MOCK_IMG_3 = "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=300&q=80";
+// Mock Image URLs for visual testing (URLs estables sin fallos 404 y con CORS válido)
+const MOCK_IMG_1 = "https://placehold.co/300x300/22c55e/white?text=Evidencia+1";
+const MOCK_IMG_2 = "https://placehold.co/300x300/eab308/white?text=Evidencia+2";
+const MOCK_IMG_3 = "https://placehold.co/300x300/ef4444/white?text=Evidencia+3";
 
 export const REGISTROS_DIARIOS = [
   {

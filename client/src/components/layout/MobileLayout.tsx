@@ -1,22 +1,33 @@
 import { Link, useLocation } from "wouter";
-import { Home, Users, Car, FileText, Menu, LogOut, Upload } from "lucide-react";
+import { Home, Users, Car, FileText, Menu, LogOut, Upload, ArrowRightSquare, ArrowLeftSquare } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { USUARIO_ACTUAL } from "@/lib/mock-data";
 import escudoGaula from "@assets/Escudo_GAULA_Vectorizado_1772078238682.png";
+import { useAuth } from "@/lib/authContext";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { role, logout } = useAuth();
 
-  if (location === "/") return <>{children}</>;
+  if (location === "/" || location === "/register" || location === "/recover-password") return <>{children}</>;
 
-  const navItems = [
+  const adminNavItems = [
     { href: "/dashboard", label: "Inicio", icon: Home },
     { href: "/conductores", label: "Conductores", icon: Users },
     { href: "/vehiculos", label: "Vehículos", icon: Car },
     { href: "/registros", label: "Registros", icon: FileText },
     { href: "/importar", label: "Importar", icon: Upload },
   ];
+
+  const userNavItems = [
+    { href: "/dashboard", label: "Inicio", icon: Home },
+    { href: "/salida", label: "Salida", icon: ArrowRightSquare },
+    { href: "/regreso", label: "Regreso", icon: ArrowLeftSquare },
+    { href: "/registros", label: "Registros", icon: FileText },
+  ];
+
+  const navItems = role === "Administrador" ? adminNavItems : userNavItems;
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
@@ -35,14 +46,14 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
                 <h2 className="text-xl font-bold">GAULA Móvil</h2>
                 <p className="text-sm opacity-80 mt-1">{USUARIO_ACTUAL.nombre}</p>
                 <p className="text-[10px] opacity-60 uppercase tracking-wider font-bold mt-1">
-                  {USUARIO_ACTUAL.unidad} • {USUARIO_ACTUAL.rol}
+                  {USUARIO_ACTUAL.unidad} • {role || USUARIO_ACTUAL.rol}
                 </p>
               </div>
               <div className="flex-1 py-4 flex flex-col gap-1 px-3">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href}>
-                    <Button 
-                      variant={location === item.href ? "secondary" : "ghost"} 
+                    <Button
+                      variant={location === item.href ? "secondary" : "ghost"}
                       className={`w-full justify-start gap-3 h-12 ${location === item.href ? 'text-primary font-bold' : ''}`}
                     >
                       <item.icon className={`h-5 w-5 ${location === item.href ? 'text-primary' : ''}`} />
@@ -53,7 +64,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
               </div>
               <div className="p-4 border-t">
                 <Link href="/">
-                  <Button variant="outline" className="w-full text-destructive border-destructive/20 hover:bg-destructive/10 gap-2 h-12">
+                  <Button variant="outline" onClick={logout} className="w-full text-destructive border-destructive/20 hover:bg-destructive/10 gap-2 h-12">
                     <LogOut className="h-5 w-5" />
                     Cerrar Sesión
                   </Button>

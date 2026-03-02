@@ -9,19 +9,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { CONDUCTORES, VEHICULOS } from "@/lib/mock-data";
-import { isBefore, parseISO } from "date-fns";
+import { isBefore, parseISO, format } from "date-fns";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 export default function NuevaSalida() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const today = new Date();
-  
+
   const [vehiculoId, setVehiculoId] = useState("");
   const [conductorId, setConductorId] = useState("");
   const [pasajeros, setPasajeros] = useState<string[]>([]);
   const [fotos, setFotos] = useState<string[]>([]);
-  
+
   const checklistItems = [
     { id: "aceite", label: "Nivel de Aceite" },
     { id: "frenos", label: "Sistema de Frenos" },
@@ -30,8 +31,35 @@ export default function NuevaSalida() {
     { id: "refrigeracion", label: "Sistema de Refrigeración" }
   ];
 
-  const vehiculoSel = VEHICULOS.find(v => v.id === vehiculoId);
-  const conductorSel = CONDUCTORES.find(c => c.id === conductorId);
+  const { data: VEHICULOS = [], isLoading: loadingVehiculos } = useQuery<any[]>({ queryKey: ["/api/vehiculos"] });
+  const { data: CONDUCTORES = [], isLoading: loadingConductores } = useQuery<any[]>({ queryKey: ["/api/conductores"] });
+
+  const mutation = useMutation({
+    mutationFn: async (nuevoRegistro: any) => {
+      const res = await fetch("/api/registros", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoRegistro)
+      });
+      if (!res.ok) throw new Error("Fallo al crear salida");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/registros"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vehiculos"] });
+      toast({
+        title: "Salida registrada",
+        description: `El vehículo partió exitosamente.`,
+      });
+      setLocation("/dashboard");
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Ocurrió un error al registrar en servidor.", variant: "destructive" });
+    }
+  });
+
+  const vehiculoSel = VEHICULOS.find((v: any) => v.id === vehiculoId);
+  const conductorSel = CONDUCTORES.find((c: any) => c.id === conductorId);
 
   const isVencido = (dateStr?: string) => {
     if (!dateStr) return false;
@@ -81,17 +109,35 @@ export default function NuevaSalida() {
       return;
     }
 
-    toast({
-      title: "Salida registrada",
-      description: `Vehículo ${vehiculoSel.siglas} en misión.`,
-    });
-    setLocation("/dashboard");
+    const formEl = e.target as HTMLFormElement;
+    const destino = (formEl.elements.namedItem("destino") as HTMLInputElement).value;
+    const mision = (formEl.elements.namedItem("mision") as HTMLInputElement).value;
+
+    const payload = {
+      fecha: format(today, "yyyy-MM-dd"),
+      hora_salida: format(today, "HH:mm"),
+      vehiculoId,
+      conductorId,
+      destino,
+      mision,
+      kilometraje_salida: vehiculoSel.kilometraje_actual,
+      fotos_salida: fotos,
+      observaciones: (formEl.elements.namedItem("observaciones") as HTMLInputElement)?.value || "",
+      pasajeros: pasajeros.map(pId => {
+        const p = CONDUCTORES.find(c => c.id === pId);
+        return p ? `${p.grado} ${p.nombres} ${p.apellidos}` : pId;
+      }).join(", ")
+    };
+
+    mutation.mutate(payload);
   };
+
+  if (loadingVehiculos || loadingConductores) return <div className="text-center p-8">Cargando dependencias...</div>;
 
   return (
     <div className="pb-8">
       <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">Registrar Salida</h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* CONDUCTOR SELECTION */}
         <Card className="shadow-sm border-slate-200">
@@ -101,20 +147,31 @@ export default function NuevaSalida() {
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-2">
               <Label>Conductor Principal</Label>
-              <Select value={conductorId} onValueChange={setConductorId}>
+              <Select value={conductorId} onValueChange={(id) => {
+                const c = CONDUCTORES.find(c => c.id === id);
+                if (c && c.estado !== 'Activo') {
+                  toast({
+                    title: "Conductor no disponible",
+                    description: `${c.grado} ${c.apellidos} se encuentra en estado INACTIVO y no puede retirar vehículos.`,
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                setConductorId(id);
+              }}>
                 <SelectTrigger className="h-12 bg-white">
                   <SelectValue placeholder="Seleccione conductor..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {CONDUCTORES.filter(c => c.estado === 'Activo').map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.grado} {c.apellidos} - {c.placa_policial}
+                  {CONDUCTORES.map(c => (
+                    <SelectItem key={c.id} value={c.id} disabled={c.estado !== 'Activo'}>
+                      {c.grado} {c.apellidos} - {c.placa_policial} ({c.estado})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             {conductorSel && (
               <div className="bg-blue-50 p-3 rounded-md border border-blue-100 animate-in fade-in slide-in-from-top-1">
                 <p className="font-semibold text-blue-900">{conductorSel.grado} {conductorSel.nombres} {conductorSel.apellidos}</p>
@@ -132,14 +189,25 @@ export default function NuevaSalida() {
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-2">
               <Label>Seleccionar Vehículo</Label>
-              <Select value={vehiculoId} onValueChange={setVehiculoId}>
+              <Select value={vehiculoId} onValueChange={(id) => {
+                const v = VEHICULOS.find(v => v.id === id);
+                if (v && v.estado !== 'Disponible') {
+                  toast({
+                    title: "Vehículo no disponible",
+                    description: `El vehículo ${v.siglas} se encuentra ${v.estado}. No puede ser utilizado para una nueva salida.`,
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                setVehiculoId(id);
+              }}>
                 <SelectTrigger className="h-12 bg-white">
                   <SelectValue placeholder="Seleccione vehículo..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {VEHICULOS.filter(v => v.estado === 'Disponible').map(v => (
-                    <SelectItem key={v.id} value={v.id}>
-                      {v.siglas} - {v.placa}
+                  {VEHICULOS.map(v => (
+                    <SelectItem key={v.id} value={v.id} disabled={v.estado !== 'Disponible'}>
+                      {v.siglas} - {v.placa} ({v.estado})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -181,13 +249,13 @@ export default function NuevaSalida() {
             <Button type="button" variant="outline" onClick={simulateTakePhoto} className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50">
               <Camera className="h-5 w-5" /> Tomar Foto (Salida)
             </Button>
-            
+
             <div className="grid grid-cols-3 gap-2">
               {fotos.map((foto, index) => (
                 <div key={index} className="relative aspect-square rounded-md overflow-hidden border border-slate-200 animate-in zoom-in-95">
                   <img src={foto} alt={`Salida ${index + 1}`} className="w-full h-full object-cover" />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => removeFoto(index)}
                     className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1"
                   >
@@ -224,7 +292,7 @@ export default function NuevaSalida() {
             <div className="space-y-2">
               {pasajeros.map(pId => {
                 const p = CONDUCTORES.find(c => c.id === pId);
-                return ( p && (
+                return (p && (
                   <div key={pId} className="flex items-center justify-between p-2 bg-slate-50 rounded border animate-in zoom-in-95">
                     <span className="text-sm font-medium">{p.grado} {p.apellidos} {p.nombres}</span>
                     <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removePasajero(pId)}>
@@ -270,11 +338,15 @@ export default function NuevaSalida() {
               <Label htmlFor="mision">Actividad</Label>
               <Input id="mision" placeholder="Propósito de la salida" required className="h-12 bg-white" />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="observaciones">Observaciones</Label>
+              <Input id="observaciones" placeholder="Detalles adicionales (opcional)" className="h-12 bg-white" />
+            </div>
           </CardContent>
         </Card>
 
-        <Button type="submit" className="w-full h-14 text-lg bg-primary hover:bg-primary/90 shadow-lg" data-testid="button-guardar-salida">
-          <Check className="mr-2 h-5 w-5" /> Registrar Salida
+        <Button type="submit" disabled={mutation.isPending} className="w-full h-14 text-lg bg-primary hover:bg-primary/90 shadow-lg" data-testid="button-guardar-salida">
+          <Check className="mr-2 h-5 w-5" /> {mutation.isPending ? "Registrando..." : "Registrar Salida"}
         </Button>
       </form>
     </div>
