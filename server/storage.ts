@@ -125,3 +125,29 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+
+// Código temporal para crear la tabla de sesiones
+import { pool } from "./db";
+(async () => {
+  try {
+    await pool.query(`
+            CREATE TABLE IF NOT EXISTS "session" (
+              "sid" varchar NOT NULL COLLATE "default",
+              "sess" json NOT NULL,
+              "expire" timestamp(6) NOT NULL
+            ) WITH (OIDS=FALSE);
+            
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey') THEN
+                    ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+                END IF;
+            END $$;
+
+            CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+        `);
+    console.log("✅ Tabla de sesiones verificada/creada con éxito");
+  } catch (err) {
+    console.error("❌ Error creando tabla de sesiones:", err);
+  }
+})();
