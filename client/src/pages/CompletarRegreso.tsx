@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, CheckCircle2, X } from "lucide-react";
+import { Camera, CheckCircle2, X, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -194,22 +194,42 @@ export default function CompletarRegreso() {
 
             <div className="space-y-4 border-t pt-4">
               <Label>Evidencia Fotográfica (Regreso)</Label>
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                id="foto-regreso"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById('foto-regreso')?.click()}
-                className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50"
-              >
-                <Camera className="h-5 w-5" /> Tomar Foto o Subir Evidencia (Regreso)
-              </Button>
+              <div className="flex gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  id="foto-regreso-camara"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('foto-regreso-camara')?.click()}
+                  className="flex-1 h-16 border-dashed border-2 flex flex-col gap-1 text-slate-500 bg-slate-50"
+                >
+                  <Camera className="h-5 w-5" /> 
+                  <span className="text-xs font-semibold">Cámara</span>
+                </Button>
+                
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="foto-regreso-galeria"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('foto-regreso-galeria')?.click()}
+                  className="flex-1 h-16 border-dashed border-2 flex flex-col gap-1 text-slate-500 bg-slate-50"
+                >
+                  <Upload className="h-5 w-5" />
+                  <span className="text-xs font-semibold">Galería / PC</span>
+                </Button>
+              </div>
 
               <div className="grid grid-cols-3 gap-2">
                 {fotos.map((foto, index) => (

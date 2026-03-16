@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock, X } from "lucide-react";
+import { Camera, Check, Plus, Trash2, AlertTriangle, CalendarClock, X, Upload } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { isBefore, parseISO, format } from "date-fns";
@@ -262,22 +262,42 @@ export default function NuevaSalida() {
           </CardHeader>
           <CardContent className="pt-4 space-y-4">
             <div className="space-y-4">
+            <div className="flex gap-3">
               <input
                 type="file"
                 accept="image/*"
                 capture="environment"
-                id="foto-salida"
+                id="foto-salida-camara"
                 className="hidden"
                 onChange={handleFileChange}
               />
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => document.getElementById('foto-salida')?.click()}
-                className="w-full h-14 border-dashed border-2 flex gap-2 text-slate-500 bg-slate-50"
+                onClick={() => document.getElementById('foto-salida-camara')?.click()}
+                className="flex-1 h-16 border-dashed border-2 flex flex-col gap-1 text-slate-500 bg-slate-50"
               >
-                <Camera className="h-5 w-5" /> Tomar Foto o Subir Evidencia
+                <Camera className="h-5 w-5" /> 
+                <span className="text-xs font-semibold">Cámara</span>
               </Button>
+              
+              <input
+                type="file"
+                accept="image/*"
+                id="foto-salida-galeria"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('foto-salida-galeria')?.click()}
+                className="flex-1 h-16 border-dashed border-2 flex flex-col gap-1 text-slate-500 bg-slate-50"
+              >
+                <Upload className="h-5 w-5" />
+                <span className="text-xs font-semibold">Galería / PC</span>
+              </Button>
+            </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
