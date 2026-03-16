@@ -68,9 +68,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRegistros(): Promise<RegistroDetallado[]> {
-    const allRegistros = await db.select().from(registros).orderBy(desc(registros.fecha), desc(registros.hora_salida));
+    const allRegistros = await db.select({
+      id: registros.id,
+      fecha: registros.fecha,
+      hora_salida: registros.hora_salida,
+      vehiculoId: registros.vehiculoId,
+      conductorId: registros.conductorId,
+      destino: registros.destino,
+      mision: registros.mision,
+      kilometraje_salida: registros.kilometraje_salida,
+      hora_regreso: registros.hora_regreso,
+      kilometraje_regreso: registros.kilometraje_regreso,
+      estado_registro: registros.estado_registro,
+      observaciones: registros.observaciones,
+      pasajeros: registros.pasajeros,
+    }).from(registros).orderBy(desc(registros.fecha), desc(registros.hora_salida));
 
-    // Manual join for detailed view (Drizzle can do this better but keeping it simple)
+    // Manual join for detailed view
     const detailed = await Promise.all(allRegistros.map(async (r) => {
       const [v] = await db.select().from(vehiculos).where(eq(vehiculos.id, r.vehiculoId));
       const [c] = await db.select().from(conductores).where(eq(conductores.id, r.conductorId));
@@ -100,7 +114,9 @@ export class DatabaseStorage implements IStorage {
     if (!updatedReg) return undefined;
     const [v] = await db.select().from(vehiculos).where(eq(vehiculos.id, updatedReg.vehiculoId));
     const [c] = await db.select().from(conductores).where(eq(conductores.id, updatedReg.conductorId));
-    return { ...updatedReg, vehiculo: v, conductor: c } as RegistroDetallado;
+    // Exclude fotos from the returned record to prevent huge payloads when updating
+    const { fotos_salida, fotos_regreso, ...rest } = updatedReg;
+    return { ...rest, vehiculo: v, conductor: c } as RegistroDetallado;
   }
 
   async createConductor(conductor: Conductor): Promise<Conductor> {

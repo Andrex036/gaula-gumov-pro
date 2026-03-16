@@ -12,6 +12,68 @@ import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
+function RegistroFotos({ registroId }: { registroId: string }) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: [`/api/registros/${registroId}/fotos`],
+    queryFn: async () => {
+      const res = await fetch(`/api/registros/${registroId}/fotos`);
+      if (!res.ok) throw new Error("Fallo al cargar fotos");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000, // cache for 5 minutes
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-slate-500 p-2">
+        <Loader2 className="h-4 w-4 animate-spin" /> Cargando evidencias...
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return <div className="text-xs text-rose-500 p-2">Error al cargar evidencias.</div>;
+  }
+
+  const { fotos_salida, fotos_regreso } = data;
+
+  if (!fotos_salida?.length && !fotos_regreso?.length) {
+    return <div className="text-xs text-slate-400 p-2">No hay evidencia fotográfica.</div>;
+  }
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Salida */}
+      {fotos_salida?.map((foto: string, idx: number) => (
+        <Dialog key={`salida-${idx}`}>
+          <DialogTrigger asChild>
+            <div className="relative shrink-0 w-16 h-16 rounded-md overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity">
+              <img src={foto} crossOrigin="anonymous" alt="Salida" className="w-full h-full object-cover" />
+              <div className="absolute bottom-0 inset-x-0 bg-primary/80 text-[8px] text-white text-center py-0.5">S</div>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="p-1 bg-black border-none max-w-lg">
+            <img src={foto} alt="Evidencia Salida" className="w-full h-auto rounded" />
+          </DialogContent>
+        </Dialog>
+      ))}
+      {/* Regreso */}
+      {fotos_regreso?.map((foto: string, idx: number) => (
+        <Dialog key={`regreso-${idx}`}>
+          <DialogTrigger asChild>
+            <div className="relative shrink-0 w-16 h-16 rounded-md overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity">
+              <img src={foto} crossOrigin="anonymous" alt="Regreso" className="w-full h-full object-cover" />
+              <div className="absolute bottom-0 inset-x-0 bg-emerald-600/80 text-[8px] text-white text-center py-0.5">R</div>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="p-1 bg-black border-none max-w-lg">
+            <img src={foto} alt="Evidencia Regreso" className="w-full h-auto rounded" />
+          </DialogContent>
+        </Dialog>
+      ))}
+    </div>
+  );
+}
 export default function Registros() {
   const [search, setSearch] = useState("");
   const [filterState, setFilterState] = useState("Todos");
@@ -294,41 +356,12 @@ export default function Registros() {
                 </div>
               </div>
 
-              {/* GALERIA DE FOTOS */}
+              {/* GALERIA DE FOTOS LAZY LOAD */}
               <div className="space-y-2 pt-2 border-t">
                 <p className="text-[10px] uppercase text-slate-400 font-bold flex items-center gap-1">
                   <ImageIcon className="h-3 w-3" /> Evidencia Fotográfica
                 </p>
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {/* Salida */}
-                  {reg.fotos_salida?.map((foto: string, idx: number) => (
-                    <Dialog key={`salida-${idx}`}>
-                      <DialogTrigger asChild>
-                        <div className="relative shrink-0 w-16 h-16 rounded-md overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity">
-                          <img src={foto} crossOrigin="anonymous" alt="Salida" className="w-full h-full object-cover" />
-                          <div className="absolute bottom-0 inset-x-0 bg-primary/80 text-[8px] text-white text-center py-0.5">S</div>
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="p-1 bg-black border-none max-w-lg">
-                        <img src={foto} alt="Evidencia Salida" className="w-full h-auto rounded" />
-                      </DialogContent>
-                    </Dialog>
-                  ))}
-                  {/* Regreso */}
-                  {reg.fotos_regreso?.map((foto: string, idx: number) => (
-                    <Dialog key={`regreso-${idx}`}>
-                      <DialogTrigger asChild>
-                        <div className="relative shrink-0 w-16 h-16 rounded-md overflow-hidden border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity">
-                          <img src={foto} crossOrigin="anonymous" alt="Regreso" className="w-full h-full object-cover" />
-                          <div className="absolute bottom-0 inset-x-0 bg-emerald-600/80 text-[8px] text-white text-center py-0.5">R</div>
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="p-1 bg-black border-none max-w-lg">
-                        <img src={foto} alt="Evidencia Regreso" className="w-full h-auto rounded" />
-                      </DialogContent>
-                    </Dialog>
-                  ))}
-                </div>
+                <RegistroFotos registroId={reg.id} />
               </div>
             </CardContent>
           </Card>

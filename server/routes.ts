@@ -261,8 +261,23 @@ export async function registerRoutes(
 
   app.get("/api/registros", async (req: Request, res: Response) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const registros = await storage.getRegistros();
-    res.json(registros);
+    const sqlRegistros = await storage.getRegistros();
+    res.json(sqlRegistros);
+  });
+
+  app.get("/api/registros/:id/fotos", async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const id = req.params.id as string;
+      const fullReg = await storage.getRegistro(id);
+      if (!fullReg) return res.status(404).json({ message: "Registro no encontrado" });
+      res.json({
+        fotos_salida: (fullReg.fotos_salida as string[]) || [],
+        fotos_regreso: (fullReg.fotos_regreso as string[]) || []
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: "Error cargando evidencias" });
+    }
   });
 
   app.post("/api/registros", async (req: Request, res: Response) => {
