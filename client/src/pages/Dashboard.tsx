@@ -22,6 +22,14 @@ export default function Dashboard() {
 
   const pendientesRegreso = todosLosRegistros.filter(r => r.estado_registro === "Abierto");
 
+  // Get current date as string in YYYY-MM-DD format for simple string comparison
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const vehiculosVencidos = vehiculos.filter(v => {
+    const isSoatVencido = v.vencimiento_soat && v.vencimiento_soat < todayStr;
+    const isTecnoVencida = v.vencimiento_tecnomecanica && v.vencimiento_tecnomecanica < todayStr;
+    return isSoatVencido || isTecnoVencida;
+  });
   if (loadingV || loadingR) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -98,9 +106,43 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               ))}
-              {pendientesRegreso.length === 0 && (
+              {vehiculosVencidos.map((v) => {
+                const isSoatVencido = v.vencimiento_soat && v.vencimiento_soat < todayStr;
+                const isTecnoVencida = v.vencimiento_tecnomecanica && v.vencimiento_tecnomecanica < todayStr;
+                
+                let numVencidos = 0;
+                let mensaje = "";
+                
+                if (isSoatVencido && isTecnoVencida) {
+                  mensaje = "SOAT y Tecnomecánica Vencidos";
+                  numVencidos = 2;
+                } else if (isSoatVencido) {
+                  mensaje = "SOAT Vencido";
+                  numVencidos = 1;
+                } else {
+                  mensaje = "Tecnomecánica Vencida";
+                  numVencidos = 1;
+                }
+
+                return (
+                  <Card key={`vencido-${v.id}`} className="border-l-4 border-l-rose-500 shadow-sm bg-rose-50/50">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-sm text-rose-900 line-clamp-1">{v.siglas} • {v.placa}</p>
+                        <p className="text-xs text-rose-700 font-medium mt-1">
+                          {mensaje}
+                        </p>
+                      </div>
+                      <Link href={`/vehiculos`}>
+                        <Button variant="outline" size="sm" className="text-xs h-8 border-rose-200 text-rose-800 hover:bg-rose-100 hover:text-rose-900 shrink-0 ml-2">Revisar</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              {pendientesRegreso.length === 0 && vehiculosVencidos.length === 0 && (
                 <div className="text-center p-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed">
-                  No hay vehículos pendientes de regreso.
+                  No hay alertas actuales.
                 </div>
               )}
             </div>
