@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import imageCompression from "browser-image-compression";
 
 export default function CompletarRegreso() {
   const [location, setLocation] = useLocation();
@@ -53,25 +54,41 @@ export default function CompletarRegreso() {
     }
   }, [registroSel, registroId]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 15 * 1024 * 1024) {
       toast({
-        title: "Archivo muy pesado",
-        description: "La imagen no debe superar los 5MB.",
+        title: "Archivo demasiado pesado",
+        description: "Intente con una imagen que pise menos de 15MB.",
         variant: "destructive"
       });
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setFotos((prev) => [...prev, base64String]);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+
+      const compressedFile = await imageCompression(file, options);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFotos((prev) => [...prev, base64String]);
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+       toast({
+        title: "Error de compresión",
+        description: "No se pudo procesar la imagen.",
+        variant: "destructive"
+      });
+    }
     e.target.value = "";
   };
 

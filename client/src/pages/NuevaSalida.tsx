@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isBefore, parseISO, format } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import imageCompression from "browser-image-compression";
 
 export default function NuevaSalida() {
   const [, setLocation] = useLocation();
@@ -84,26 +85,43 @@ export default function NuevaSalida() {
     setPasajeros(pasajeros.filter(p => p !== id));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tamaño (máximo 5MB por foto para no sobrecargar la DB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Aumentamos el límite visual a 15MB, ya que lo vamos a comprimir a KB en el lado cliente
+    if (file.size > 15 * 1024 * 1024) {
       toast({
-        title: "Archivo muy pesado",
-        description: "La imagen no debe superar los 5MB.",
+        title: "Archivo demasiado pesado",
+        description: "Intente con una imagen que pise menos de 15MB.",
         variant: "destructive"
       });
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setFotos((prev) => [...prev, base64String]);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Opciones de compresión: intentar reducir a un máx de 1MB, y 1024px de ancho/alto máximo
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+
+      const compressedFile = await imageCompression(file, options);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setFotos((prev) => [...prev, base64String]);
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      toast({
+        title: "Error de compresión",
+        description: "No se pudo procesar la imagen.",
+        variant: "destructive"
+      });
+    }
 
     // Reset input for next capture
     e.target.value = "";
